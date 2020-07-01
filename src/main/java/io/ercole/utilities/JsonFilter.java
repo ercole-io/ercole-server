@@ -396,4 +396,15 @@ public final class JsonFilter {
 		}
 		return features;
 	}
+
+	public static String getManagementPack(final JSONArray feat) {
+		String features = "";
+		for (int i = 0; i < feat.length(); i++) {
+			if (feat.get(i).toString().contains("true") && (feat.getJSONObject(i).getString("Name").equals("Diagnostics Pack") || feat.getJSONObject(i).getString("Name").equals("Tuning Pack")))  {
+				JSONObject jsonObject = (JSONObject) feat.get(i);
+				features = features.concat(jsonObject.getString("Name") + ",");
+			}
+		}
+		return features;
+	}
 }
