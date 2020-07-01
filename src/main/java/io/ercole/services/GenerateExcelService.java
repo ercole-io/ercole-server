@@ -62,12 +62,11 @@ public class GenerateExcelService {
 
         try (Workbook workbook = new XSSFWorkbook(new ClassPathResource("template_hosts.xlsm").getInputStream())) {
 
-            XSSFSheet xssfSheet = ((XSSFWorkbook) workbook).getSheet("Database_&_EBS");
+            XSSFSheet xssfSheet = ((XSSFWorkbook) workbook).getSheet("Database_&_EBS_DB_Tier");
             //number of row where we will write (row 0,1,2 contains the heading of the table)
             int rowNumber = 3;
 
             for (CurrentHost host : iterable) {
-                XSSFRow row = xssfSheet.createRow(rowNumber);
                 //get json HostInfo (it contains another 16 field)
                 JSONObject root = new JSONObject(host.getHostInfo());
                 //get json ExtraInfo (it contains another 2 json array - databases and features)
@@ -78,88 +77,107 @@ public class GenerateExcelService {
                 if (arrayExtraInfo.length() == 0) {
                     continue;
                 }
-                JSONObject database = arrayExtraInfo.getJSONObject(0);
-                //get json array features (after we will create jsonObject features from this array -getFeatures())
-                JSONArray features = database.getJSONArray("Features");
 
-                //index 
-                int indexChiocciola = root.getString(cpuM).lastIndexOf(' ');
-                int indexVersion = database.getString(vrs).indexOf(' ');
-
-                //save data into array
-                String[] dataOfHost = new String[20];
-                if (root.getString("Type").equals("VMWARE") || root.getString("Type").equals("OVM")) {
-                        dataOfHost[0]  =
-                                host.getAssociatedClusterName();                     //physical server name
-                        dataOfHost[1]  =
-                                host.getHostname();        //virtual server name
-                } else {
-                        dataOfHost[0]  =
-                                host.getHostname();                     //physical server name
-                        dataOfHost[1]  =
-                                host.getAssociatedClusterName();        //virtual server name
-                }
-                dataOfHost[2]  =
-                        root.getString("Type");           //virtualization technol.
-                dataOfHost[3]  =
-                        host.getDatabases();                   //db instace name
-                dataOfHost[4]  =
-                        " ";                                   //pluggable db name
-                dataOfHost[5]  =
-                        " ";                                   //connect string
-                dataOfHost[6]  =
-                        String.valueOf(database.get(vrs)).substring(0, 2); //product version
-                dataOfHost[7]  =
-                        String.valueOf(database.get(vrs)).substring(indexVersion);      //product edition
-                dataOfHost[8]  =
-                        host.getEnvironment();                    //environment
-                dataOfHost[9]  =
-                        JsonFilter.getTrueFeatures(features);       // options and oem packs
-                dataOfHost[10] =
-                        " ";         //rac node names
-                dataOfHost[11] =
-                        String.valueOf(root.get(cpuM));             //processor model
-                dataOfHost[12] = String.valueOf(root.get("Socket")); // processor socket
-
-                int coresPerProcessor = root.getInt("CPUCores"); // core per processor
-                if (root.getInt("CPUCores") >= root.getInt("Socket") && root.getInt("Socket") != 0) {
-                    coresPerProcessor = root.getInt("CPUCores") / root.getInt("Socket"); // core per processor
-                }
-                dataOfHost[13] = String.valueOf(coresPerProcessor);
-
-                int physicalCores;
-                if (root.getInt("Socket") == 0) {
-                    physicalCores =  coresPerProcessor;
-                } else {
-                    physicalCores = coresPerProcessor * root.getInt("Socket");
-                }
-                dataOfHost[14] = Integer.toString(physicalCores); 
                 
-                if (String.valueOf(root.get(cpuM)).contains("SPARC")) {
-                    dataOfHost[15] = "8";
-                } else {
-                    dataOfHost[15] = "2";
-                }
-                dataOfHost[16] =
-                        String.valueOf(root.get(cpuM)).substring(indexChiocciola); //processor speed
-                dataOfHost[17] =
-                        " ";                             //server purchases date
-                dataOfHost[18] =
-                        String.valueOf(root.get("OS"));  //operating system
-                dataOfHost[19] =
-                        " ";                             //note
+                for (int j = 0; j < arrayExtraInfo.length(); j++) {
+                        XSSFRow row = xssfSheet.createRow(rowNumber);
 
-                //insert data of host into a new cell
-                int cellid = 0;
-                for (int i = 0; i < 20; i++) {
-                    //don't delete. see templateVuoto ABCD?F
-                    if (cellid == 5) {
-                        cellid++;
-                    }
-                    Cell cell = row.createCell(cellid++);
-                    cell.setCellValue(dataOfHost[i]);
+                        String[] dataOfHost = new String[40];
+
+                        JSONObject database = arrayExtraInfo.getJSONObject(j);
+                        //get json array features (after we will create jsonObject features from this array -getFeatures())
+                        JSONArray features = database.getJSONArray("Features");
+                        JSONArray licenses = database.getJSONArray("Licenses");
+
+                        //index 
+                        int indexChiocciola = root.getString(cpuM).lastIndexOf(' ');
+                        int indexVersion = database.getString(vrs).indexOf(' ');
+
+                        //save data into array
+                        if (root.getString("Type").equals("VMWARE") || root.getString("Type").equals("OVM")) {
+                                dataOfHost[0]  =
+                                        host.getAssociatedClusterName();                     //physical server name
+                                dataOfHost[1]  =
+                                        host.getHostname();        //virtual server name
+                        } else {
+                                dataOfHost[0]  =
+                                        host.getHostname();                     //physical server name
+                                dataOfHost[1]  =
+                                        host.getAssociatedClusterName();        //virtual server name
+                        }
+                        switch (root.getString("Type")) {
+                                case "PH":
+                                        dataOfHost[2]  = "";
+                                case "OVM":
+                                        if (String.valueOf(root.get(cpuM)).contains("SPARC")) {
+                                                dataOfHost[2]  = "OVM Server for SPARC";
+                                        } else {
+                                                dataOfHost[2] = "OVM Server for x86";
+                                        }
+                                case "VMWARE":
+                                        dataOfHost[2]  = "VMware";
+                                case "HYPERV":
+                                        dataOfHost[2]  = "Hyper-V";
+                                default:
+                                        dataOfHost[2] = root.getString("Type");
+                        }
+
+                        System.out.println(database.getString("Name"));
+                        dataOfHost[3]  = database.getString("Name");
+                        dataOfHost[5]  = host.getEnvironment();
+                        dataOfHost[6]  = JsonFilter.getTrueFeatures(features);
+                        dataOfHost[7]  = JsonFilter.getManagementPack(features);
+
+                        dataOfHost[12] =         String.valueOf(database.get(vrs)).substring(0, 2); //product version
+                        dataOfHost[13] = String.valueOf(database.get(vrs)).substring(indexVersion);
+                        if (String.valueOf(database.get(vrs)).toLowerCase().contains("standard")) {
+                                dataOfHost[13] = "SE";
+                        } else if (String.valueOf(database.get(vrs)).toLowerCase().contains("enterprise")) {
+                                dataOfHost[13] = "EE";
+                        }
+                        dataOfHost[14] = "processor";
+                        
+                        dataOfHost[15] = "???";
+                        for (int k = 0; k < licenses.length(); k++) {
+                                JSONObject lic = licenses.getJSONObject(k);
+                                if (lic.getFloat("Count") > 0 && (lic.getString("Name").equals("Oracle EXE") || lic.getString("Name").equals("Oracle STD") || lic.getString("Name").equals("Oracle ENT"))) {
+                                        dataOfHost[15] = Float.toString(lic.getFloat("Count"));                                  
+                                }
+                        }
+                        dataOfHost[27] = String.valueOf(root.get(cpuM));             //processor model
+                        dataOfHost[28] = String.valueOf(root.get("Socket")); // processor socket
+                        int coresPerProcessor = root.getInt("CPUCores"); // core per processor
+                        if (root.getInt("CPUCores") >= root.getInt("Socket") && root.getInt("Socket") != 0) {
+                                coresPerProcessor = root.getInt("CPUCores") / root.getInt("Socket"); // core per processor
+                        }
+                        dataOfHost[29] = String.valueOf(coresPerProcessor);
+                        int physicalCores;
+                        if (root.getInt("Socket") == 0) {
+                                physicalCores =  coresPerProcessor;
+                        } else {
+                                physicalCores = coresPerProcessor * root.getInt("Socket");
+                        }
+                        dataOfHost[30] = Integer.toString(physicalCores); 
+                        if (String.valueOf(root.get(cpuM)).contains("SPARC")) {
+                                dataOfHost[31] = "8";
+                        } else {
+                                dataOfHost[31] = "2";
+                        }
+                        
+                        dataOfHost[32] =
+                                String.valueOf(root.get(cpuM)).substring(indexChiocciola); //processor speed
+
+                        dataOfHost[34] =
+                                String.valueOf(root.get("OS"));  //operating system
+
+
+                        //insert data of host into a new cell
+                        for (int i = 0; i < 40; i++) {
+                                Cell cell = row.createCell(i + 1);
+                                cell.setCellValue(dataOfHost[i]);
+                        }
+                        rowNumber++;
                 }
-                rowNumber++;
             }
             //writing changes in the open file (templateVuoto)
 
