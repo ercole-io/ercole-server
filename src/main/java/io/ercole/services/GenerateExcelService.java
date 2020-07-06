@@ -108,16 +108,20 @@ public class GenerateExcelService {
                         switch (root.getString("Type")) {
                                 case "PH":
                                         dataOfHost[2]  = "";
+                                        break;
                                 case "OVM":
                                         if (String.valueOf(root.get(cpuM)).contains("SPARC")) {
                                                 dataOfHost[2]  = "OVM Server for SPARC";
                                         } else {
                                                 dataOfHost[2] = "OVM Server for x86";
                                         }
+                                        break;
                                 case "VMWARE":
                                         dataOfHost[2]  = "VMware";
+                                        break;
                                 case "HYPERV":
                                         dataOfHost[2]  = "Hyper-V";
+                                        break;
                                 default:
                                         dataOfHost[2] = root.getString("Type");
                         }
