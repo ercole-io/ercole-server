@@ -596,4 +596,16 @@ public class HostService {
 			mailService.send(alert);
 		}
 	}
+
+	public void checkHostAbsenceInCMDB(final String hostname) {
+		if (!alertRepo.existsByHostnameAndCode(hostname, AlertCode.MISSING_HOST_IN_CMDB)) {
+			AlertFactory generator = new AlertFactory();
+			Alert alert = alertRepo.save(generator.fireMissingHostInCMDBAlert(hostname));
+			mailService.send(alert);
+		}
+	}
+
+	public List<String> getHostnameOracleDB() {
+		return currentRepo.getOracleDBHostnames();
+	}
 }

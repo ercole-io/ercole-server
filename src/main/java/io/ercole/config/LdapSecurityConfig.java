@@ -110,6 +110,8 @@ public class LdapSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/packages/**").permitAll()
 			.antMatchers(pathUpdate).permitAll()
 			.antMatchers("/alerts/missing-host/**").permitAll()
+			.antMatchers("/alerts/missing-host-in-cmdb/**").permitAll()
+			.antMatchers("/hostnames-oracledb-for-agent").permitAll()
 			.anyRequest().fullyAuthenticated()
 			.and()
 		.formLogin()

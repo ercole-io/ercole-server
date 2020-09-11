@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -228,6 +229,24 @@ public class AgentDataController {
 	public void checkHostAbsence(final HttpServletRequest request, final @PathVariable String hostname) throws AgentLoginException {
 		if (areAgentCredentialsValid(request.getHeader("Authorization"))) {
 			hostService.checkHostAbsence(hostname);
+		} else {
+			throw new AgentLoginException("Parametri user o password dell'agente errati.");
+		}
+	}
+
+	@PostMapping("/alerts/missing-host-in-cmdb/{hostname}")
+	public void checkHostAbsenceInCMDB(final HttpServletRequest request, final @PathVariable String hostname) throws AgentLoginException {
+		if (areAgentCredentialsValid(request.getHeader("Authorization"))) {
+			hostService.checkHostAbsenceInCMDB(hostname);
+		} else {
+			throw new AgentLoginException("Parametri user o password dell'agente errati.");
+		}
+	}
+
+	@GetMapping("/hostnames-oracledb-for-agent")
+	public List<String> getHostnames(final HttpServletRequest request) throws AgentLoginException {
+		if (areAgentCredentialsValid(request.getHeader("Authorization"))) {
+			return hostService.getHostnameOracleDB();
 		} else {
 			throw new AgentLoginException("Parametri user o password dell'agente errati.");
 		}
