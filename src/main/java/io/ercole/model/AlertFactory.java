@@ -74,10 +74,21 @@ public class AlertFactory {
 	 * @return an Alert for having added a new Server
 	 */
 	public Alert fireMissingHostAlert(final String hostname) {
-		String description = "Server " + hostname + " is missing";
+		String description = "Server " + hostname + " is missing from ercole";
 		return new Alert(hostname, AlertCode.MISSING_HOST, description, 
 				AlertSeverity.NOTICE);
 	}
+
+
+	/**
+	* @param hostname is the Hostname
+	* @return an Alert for having added a new Server
+	*/
+   public Alert fireMissingHostInCMDBAlert(final String hostname) {
+	   String description = "Server " + hostname + " is missing from CMDB";
+	   return new Alert(hostname, AlertCode.MISSING_HOST_IN_CMDB, description, 
+			   AlertSeverity.NOTICE);
+   }
 
 	/**
 	 * @param newDbs map of Databases incoming from agent

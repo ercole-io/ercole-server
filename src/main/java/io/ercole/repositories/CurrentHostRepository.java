@@ -74,6 +74,14 @@ public interface CurrentHostRepository extends PagingAndSortingRepository<Curren
 	 */
 	@Query("SELECT m FROM CurrentHost m")
 	Stream<CurrentHost> findAllHosts();
+	
+	/**
+	 * Gets hostname of hosts with oracledb.
+	 *
+	 * @return different types of active server locations
+	 */
+	@Query("SELECT m.hostname FROM CurrentHost m WHERE m.hostType IS NULL OR m.hostType = 'oracledb'")
+	List<String> getOracleDBHostnames();
 
 	/**
 	 * Find by db.

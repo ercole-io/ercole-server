@@ -35,7 +35,10 @@ public enum AlertCode {
 	NO_DATA("No Data"),
 
 	/** The mssing host.*/
-	MISSING_HOST("Missing Host");
+	MISSING_HOST("Missing Host"),
+
+	/** The mssing host.*/
+	MISSING_HOST_IN_CMDB("Missing Host in CMDB");
 
 	/**
 	 * Instantiates a new alert code.

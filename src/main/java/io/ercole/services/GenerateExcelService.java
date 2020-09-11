@@ -131,9 +131,14 @@ public class GenerateExcelService {
                         dataOfHost[5]  = host.getEnvironment();
                         dataOfHost[6]  = JsonFilter.getTrueFeatures(features);
                         dataOfHost[7]  = JsonFilter.getManagementPack(features);
+                        if (String.valueOf(database.get(vrs)).contains(" ")) {
+                                dataOfHost[12] =         String.valueOf(database.get(vrs)).split(" ")[0]; //product version
+                                dataOfHost[13] = String.valueOf(database.get(vrs)).substring(indexVersion);
+                        } else {
+                                dataOfHost[12] =         String.valueOf(database.get(vrs)); //product version
+                                dataOfHost[13] = String.valueOf(database.get(vrs));
 
-                        dataOfHost[12] =         String.valueOf(database.get(vrs)).substring(0, 2); //product version
-                        dataOfHost[13] = String.valueOf(database.get(vrs)).substring(indexVersion);
+                        }
                         if (String.valueOf(database.get(vrs)).toLowerCase().contains("standard")) {
                                 dataOfHost[13] = "SE";
                         } else if (String.valueOf(database.get(vrs)).toLowerCase().contains("enterprise")) {
